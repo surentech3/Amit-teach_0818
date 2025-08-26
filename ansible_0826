@@ -1,0 +1,63 @@
+###ansibel installation and key generation and copy steps
+
+
+####install on rhel
+
+   6  dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
+    7  dnf config-manager --set-enabled epel
+    8  dnf install -y ansible
+    9  ansible --version
+
+### install on ubuntu
+
+apt update
+apt install -y software-properties-common
+add-apt-repository --yes --update ppa:ansible/ansible
+apt install -y ansible
+
+
+### key generation and copying
+
+    1  ssh-keygen
+    2  exit
+    3  clear
+    4  cd ~/.ssh
+    5  ls -lrt
+    6  ssh-copy-id -i amit@34.134.237.167( slave node IP address)
+
+
+### ad-hoc commands
+
+   22  ansible -m ping webservers
+   23  ansible -m command -a uptime webservers
+   24  ansible -m command -a "df -kh /tmp" webservers
+   25  ansible -m yum -a "name=httpd state=present" webservers
+   26  ansible -m yum -a "name=httpd state=present" webservers --become
+   27  ansible -m yum -a "name=httpd state=absent" webservers --become
+   28  ansible -m yum -a "name=httpd state=present" webservers --become
+   29  ansibel -m service -a "name=httpd state=started" webservers --become
+   30  ansible -m service -a "name=httpd state=started" webservers --become
+   31  ansible -m service -a "name=httpd state=stopped" webservers --become
+
+
+#### ansible playbook ( a.yml )
+
+
+---
+- hosts: webservers
+  become: true
+  become_user: root
+  gather_facts: no
+  tasks:
+  - name: install some package
+    yum:
+     name: httpd
+     state: present
+  - name: start the service
+    service:
+     name: httpd
+     state: started
+    register: service_execution
+  - name: show status
+    debug:
+     var: service_execution.state
